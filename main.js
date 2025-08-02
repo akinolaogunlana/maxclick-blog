@@ -1,9 +1,9 @@
 // main.js
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Step 1: Firebase Config
+// ✅ Replace with your actual Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCqgfH_fX69EqBe5iOmN7F1E09gGj4zW60",
   authDomain: "animated-way-426007-p6.firebaseapp.com",
@@ -13,11 +13,11 @@ const firebaseConfig = {
   appId: "1:33587602209:web:818e58f30a2886eb4b9460"
 };
 
-// Step 2: Initialize Firebase
+// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Step 3: Fetch and Display Posts
+// ✅ Load posts from Firestore
 const postsContainer = document.getElementById("posts");
 
 async function loadPosts() {
