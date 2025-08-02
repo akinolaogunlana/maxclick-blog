@@ -1,75 +1,42 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  orderBy,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// main.js
 
-// ✅ Firebase Config
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCqgfH_fX69EqBe5iOmN7F1E09gGj4zW60",
   authDomain: "animated-way-426007-p6.firebaseapp.com",
+  databaseURL: "https://animated-way-426007-p6-default-rtdb.firebaseio.com",
   projectId: "animated-way-426007-p6",
-  storageBucket: "animated-way-426007-p6.appspot.com",
+  storageBucket: "animated-way-426007-p6.firebasestorage.app",
   messagingSenderId: "33587602209",
-  appId: "1:33587602209:web:818e58f30a2886eb4b9460"
+  appId: "1:33587602209:web:818e58f30a2886eb4b9460",
+  measurementId: "G-LGG4K6E22F"
 };
 
-// ✅ Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-// ✅ Wait for the DOM to be fully loaded
-document.addEventListener("DOMContentLoaded", () => {
-  const postsContainer = document.getElementById("posts");
-  const postForm = document.getElementById("postForm");
+// DOM element to display posts
+const postsContainer = document.getElementById("posts");
 
-  // ✅ Load and display posts
-  async function loadPosts() {
-    postsContainer.innerHTML = ""; // Clear old posts
-    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
-
-    snapshot.forEach((doc) => {
-      const post = doc.data();
+// Fetch and display posts from Realtime Database
+database.ref("posts").orderByChild("createdAt").on("value", (snapshot) => {
+  postsContainer.innerHTML = ""; // Clear previous content
+  const data = snapshot.val();
+  if (data) {
+    const postsArray = Object.entries(data).sort((a, b) => b[1].createdAt - a[1].createdAt);
+    postsArray.forEach(([id, post]) => {
       const div = document.createElement("div");
       div.className = "post";
       div.innerHTML = `
         <h2>${post.title}</h2>
-        <p>${post.content}</p>
-        <small>🕒 ${post.createdAt?.toDate ? new Date(post.createdAt.toDate()).toLocaleString() : "Unknown Date"}</small>
+        <p>${post.content.length > 300 ? post.content.slice(0, 300) + "..." : post.content}</p>
+        <small>🕒 ${new Date(post.createdAt).toLocaleString()}</small>
+        <hr>
       `;
       postsContainer.appendChild(div);
     });
+  } else {
+    postsContainer.innerHTML = "<p>No posts found.</p>";
   }
-
-  // ✅ Handle post form submission
-  postForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const title = document.getElementById("title").value.trim();
-    const content = document.getElementById("content").value.trim();
-
-    if (!title || !content) return;
-
-    try {
-      await addDoc(collection(db, "posts"), {
-        title,
-        content,
-        createdAt: serverTimestamp()
-      });
-
-      postForm.reset();
-      loadPosts(); // Refresh posts
-    } catch (err) {
-      alert("Failed to add post: " + err.message);
-    }
-  });
-
-  // ✅ Initial load
-  loadPosts();
 });
