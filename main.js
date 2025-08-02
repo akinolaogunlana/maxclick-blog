@@ -1,8 +1,4 @@
-// Firebase SDK imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-// Firebase config
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCqgfH_fX69EqBe5iOmN7F1E09gGj4zW60",
   authDomain: "animated-way-426007-p6.firebaseapp.com",
@@ -15,48 +11,50 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// DOM Elements
-const postForm = document.getElementById("postForm");
-const titleInput = document.getElementById("title");
-const contentInput = document.getElementById("content");
-const postsContainer = document.getElementById("posts");
+// DOM elements
+const postForm = document.getElementById('postForm');
+const titleInput = document.getElementById('title');
+const contentInput = document.getElementById('content');
+const postsContainer = document.getElementById('posts');
 
-// Submit Handler
-postForm.addEventListener("submit", (e) => {
+// Handle form submission
+postForm.addEventListener('submit', (e) => {
   e.preventDefault();
 
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
+  const timestamp = Date.now();
 
   if (!title || !content) return;
 
-  const postRef = ref(db, "posts");
-
-  push(postRef, {
-    title,
-    content,
-    timestamp: Date.now()
-  });
+  const newPostRef = db.ref('posts').push();
+  newPostRef.set({ title, content, timestamp });
 
   postForm.reset();
 });
 
-// Load posts from Firebase
-const postRef = ref(db, "posts");
-onValue(postRef, (snapshot) => {
-  postsContainer.innerHTML = ""; // Clear posts
+// Fetch and render posts
+db.ref('posts').on('value', (snapshot) => {
+  postsContainer.innerHTML = '';
 
-  snapshot.forEach((child) => {
-    const post = child.val();
-    const postEl = document.createElement("div");
-    postEl.className = "post";
-    postEl.innerHTML = `
-      <h3>${post.title}</h3>
-      <p>${post.content}</p>
-    `;
-    postsContainer.prepend(postEl); // Newest first
-  });
+  const posts = snapshot.val();
+  if (posts) {
+    const sortedPosts = Object.entries(posts).sort((a, b) => b[1].timestamp - a[1].timestamp);
+    sortedPosts.forEach(([id, post]) => {
+      const div = document.createElement('div');
+      div.className = 'post';
+      div.innerHTML = `
+        <h2>${post.title}</h2>
+        <p>${post.content}</p>
+        <small>${new Date(post.timestamp).toLocaleString()}</small>
+        <hr>
+      `;
+      postsContainer.appendChild(div);
+    });
+  } else {
+    postsContainer.innerHTML = '<p>No posts yet.</p>';
+  }
 });
