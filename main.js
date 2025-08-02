@@ -1,9 +1,7 @@
-// main.js
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ✅ Replace with your actual Firebase config
+// ✅ Firebase Config (already filled)
 const firebaseConfig = {
   apiKey: "AIzaSyCqgfH_fX69EqBe5iOmN7F1E09gGj4zW60",
   authDomain: "animated-way-426007-p6.firebaseapp.com",
@@ -17,10 +15,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ✅ Load posts from Firestore
+// ✅ Load and display posts
 const postsContainer = document.getElementById("posts");
 
 async function loadPosts() {
+  postsContainer.innerHTML = ""; // clear old posts
   const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
 
@@ -38,3 +37,27 @@ async function loadPosts() {
 }
 
 loadPosts();
+
+// ✅ Handle post form submission
+const postForm = document.getElementById("postForm");
+postForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const title = document.getElementById("title").value.trim();
+  const content = document.getElementById("content").value.trim();
+
+  if (!title || !content) return;
+
+  try {
+    await addDoc(collection(db, "posts"), {
+      title,
+      content,
+      createdAt: serverTimestamp()
+    });
+
+    postForm.reset();
+    loadPosts(); // refresh posts
+  } catch (err) {
+    alert("Failed to add post: " + err.message);
+  }
+});
