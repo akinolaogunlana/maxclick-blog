@@ -3,31 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Write and share blog posts instantly." />
-  <meta name="author" content="MaxClickEmpire" />
-  <title>MaxClickEmpire Blog</title>
+  <title>🔥 MaxClickEmpire Blog</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="app">
+    <h1>🔥 MaxClickEmpire Blog</h1>
 
-  <div class="container">
-    <header>
-      <h1>📝 MaxClickEmpire Blog</h1>
-    </header>
+    <!-- ✅ Post Form -->
+    <form id="postForm">
+      <input type="text" id="title" placeholder="Post Title" required><br>
+      <textarea id="content" placeholder="Write your content..." rows="5" required></textarea><br>
+      <button type="submit">Add Post</button>
+    </form>
 
-    <section id="new-post">
-      <form id="postForm" autocomplete="off">
-        <input type="text" id="title" placeholder="Post Title" required />
-        <textarea id="content" placeholder="Your content here..." rows="6" required></textarea>
-        <button type="submit">Post</button>
-      </form>
-    </section>
+    <hr>
 
-    <section id="posts">
-      <!-- Posts will be loaded here -->
-    </section>
+    <!-- ✅ Posts -->
+    <div id="posts"></div>
   </div>
 
-  <script type="module" src="main.js"></script>
+  <!-- ✅ Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
+  <!-- ✅ Main Logic -->
+  <script src="main.js"></script>
 </body>
 </html>
