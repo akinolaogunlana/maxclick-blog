@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Creator Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <script type="module" src="dashboard.js" defer></script>
+</head>
+<body>
+  <nav>
+    <h1>Welcome, Creator</h1>
+    <button id="logoutBtn">Logout</button>
+  </nav>
+
+  <main>
+    <section id="stats">
+      <h2>Your Stats</h2>
+      <p>Total Views: <span id="totalViews">0</span></p>
+      <p>Total Earnings: <span id="totalEarnings">$0.00</span></p>
+    </section>
+
+    <section id="createPost">
+      <button onclick="window.location.href='create.html'">✍️ Create New Post</button>
+    </section>
+
+    <section id="yourPosts">
+      <h2>Your Posts</h2>
+      <div id="postsContainer">
+        <!-- Posts load here -->
+      </div>
+    </section>
+  </main>
+</body>
+</html>
