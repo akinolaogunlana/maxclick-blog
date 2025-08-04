@@ -1,44 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Creator Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Creator</title>
+  <link rel="stylesheet" href="creator/dashboard.css" />
+  <script type="module" src="js/auth.js" defer></script>
 </head>
 <body>
-  <h2>Login as Creator</h2>
-  <form id="loginForm">
-    <input type="email" id="email" placeholder="Email" required /><br/>
-    <input type="password" id="password" placeholder="Password" required /><br/>
-    <button type="submit">Login</button>
-  </form>
+  <main class="auth-container">
+    <section class="auth-card">
+      <h1>Login to Your Account</h1>
 
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCqgfH_fX69EqBe5iOmN7F1E09gGj4zW60",
-      authDomain: "animated-way-426007-p6.firebaseapp.com",
-      databaseURL: "https://animated-way-426007-p6-default-rtdb.firebaseio.com",
-      projectId: "animated-way-426007-p6",
-      storageBucket: "animated-way-426007-p6.appspot.com",
-      messagingSenderId: "33587602209",
-      appId: "1:33587602209:web:818e58f30a2886eb4b9460",
-      measurementId: "G-LGG4K6E22F"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="you@example.com" required />
+        </div>
 
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required />
+        </div>
 
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-        window.location.href = "creator-dashboard.html";
-      } catch (error) {
-        alert("Login Failed: " + error.message);
-      }
-    });
-  </script>
+        <button type="submit" class="btn-primary">Login</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+        <p><a href="#">Forgot Password?</a></p>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
