@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Creator Editor</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/editor.js" defer></script>
+</head>
+<body>
+  <nav class="nav-bar">
+    <h1 class="logo">✏️ Creator Editor</h1>
+    <button id="logoutBtn" class="btn logout-btn">Logout</button>
+  </nav>
+
+  <main class="editor-container">
+    <section class="editor-controls">
+      <input type="text" id="postTitle" placeholder="Enter your post title..." class="input title-input" />
+      <button id="saveBtn" class="btn save-btn">💾 Save Post</button>
+    </section>
+
+    <section class="editor-main">
+      <textarea id="postContent" placeholder="Write your content here..." class="editor-textarea"></textarea>
+    </section>
+
+    <section class="saved-alert" id="savedAlert">✅ Post Saved Successfully</section>
+  </main>
+</body>
+</html>
