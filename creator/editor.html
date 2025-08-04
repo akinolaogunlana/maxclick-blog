@@ -3,27 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Creator Editor</title>
+  <title>Post Editor | Creator</title>
+  <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.6/quill.snow.css">
   <link rel="stylesheet" href="style.css">
-  <script type="module" src="js/editor.js" defer></script>
 </head>
 <body>
-  <nav class="nav-bar">
-    <h1 class="logo">✏️ Creator Editor</h1>
-    <button id="logoutBtn" class="btn logout-btn">Logout</button>
-  </nav>
+  <header>
+    <h1>Write a New Post</h1>
+    <button id="logoutBtn">Logout</button>
+  </header>
 
-  <main class="editor-container">
-    <section class="editor-controls">
-      <input type="text" id="postTitle" placeholder="Enter your post title..." class="input title-input" />
-      <button id="saveBtn" class="btn save-btn">💾 Save Post</button>
-    </section>
+  <main>
+    <div class="editor-container">
+      <input type="text" id="postTitle" placeholder="Enter Post Title..." required>
+      
+      <select id="postCategory">
+        <option value="">Select Category</option>
+        <option value="Crypto News">Crypto News</option>
+        <option value="Education">Education</option>
+        <option value="Analysis">Analysis</option>
+        <option value="Market Trends">Market Trends</option>
+      </select>
 
-    <section class="editor-main">
-      <textarea id="postContent" placeholder="Write your content here..." class="editor-textarea"></textarea>
-    </section>
+      <div id="quillEditor"></div>
 
-    <section class="saved-alert" id="savedAlert">✅ Post Saved Successfully</section>
+      <button id="publishBtn">Publish</button>
+      <p id="publishStatus"></p>
+    </div>
   </main>
+
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/editor.js"></script>
 </body>
-</html>
+    </html>
