@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Creator Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill/dist/quill.snow.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+    }
+    .dashboard {
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background: #111827;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+    .sidebar h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .sidebar a {
+      color: white;
+      margin: 0.5rem 0;
+      text-decoration: none;
+      display: block;
+    }
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    .card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 1rem;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logout-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .quill-editor {
+      height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2>Cryptego Creator</h2>
+      <a href="#">Dashboard</a>
+      <a href="create.html">Create New Post</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+    <div class="content">
+      <div class="header">
+        <h1>Welcome, <span id="creatorName">Loading...</span></h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+
+      <div class="card">
+        <h3>Quick Stats</h3>
+        <p>Total Posts: <strong id="totalPosts">0</strong></p>
+        <p>Total Views: <strong id="totalViews">0</strong></p>
+        <p>Ad Clicks: <strong id="adClicks">0</strong></p>
+        <p>Earnings: $<strong id="earnings">0.00</strong></p>
+      </div>
+
+      <div class="card">
+        <h3>Quick Draft</h3>
+        <input type="text" id="postTitle" placeholder="Title..." style="width: 100%; margin-bottom: 0.5rem; padding: 0.5rem;">
+        <div id="editor" class="quill-editor"></div>
+        <button onclick="saveDraft()" style="margin-top: 1rem; background: #2563eb; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px;">Save Draft</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- Quill -->
+  <script src="https://cdn.jsdelivr.net/npm/quill/dist/quill.min.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqgfH_fX69EqBe5iOmN7F1E09gGj4zW60",
+      authDomain: "animated-way-426007-p6.firebaseapp.com",
+      databaseURL: "https://animated-way-426007-p6-default-rtdb.firebaseio.com",
+      projectId: "animated-way-426007-p6",
+      storageBucket: "animated-way-426007-p6.appspot.com",
+      messagingSenderId: "33587602209",
+      appId: "1:33587602209:web:818e58f30a2886eb4b9460"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let quill = new Quill('#editor', {
+      theme: 'snow'
+    });
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "../login.html";
+        return;
+      }
+
+      const uid = user.uid;
+      db.ref("creators/" + uid).once("value").then(snapshot => {
+        const data = snapshot.val();
+        document.getElementById("creatorName").innerText = data?.name || "Creator";
+        document.getElementById("earnings").innerText = data?.earnings?.toFixed(2) || "0.00";
+
+        // Load post stats (optional, basic)
+        let totalViews = 0;
+        let adClicks = 0;
+        let totalPosts = 0;
+
+        db.ref("posts").orderByChild("creatorId").equalTo(uid).once("value").then(postsSnap => {
+          postsSnap.forEach(child => {
+            const post = child.val();
+            totalPosts++;
+            totalViews += post.views || 0;
+            adClicks += post.adClicks || 0;
+          });
+
+          document.getElementById("totalPosts").innerText = totalPosts;
+          document.getElementById("totalViews").innerText = totalViews;
+          document.getElementById("adClicks").innerText = adClicks;
+        });
+      });
+    });
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "../login.html";
+      });
+    }
+
+    function saveDraft() {
+      const title = document.getElementById("postTitle").value;
+      const content = quill.root.innerHTML;
+      const user = auth.currentUser;
+      if (!title || !content) return alert("Title and content required");
+
+      const postId = db.ref().child("posts").push().key;
+      const newPost = {
+        creatorId: user.uid,
+        title,
+        content,
+        timestamp: Date.now(),
+        views: 0,
+        adClicks: 0
+      };
+
+      db.ref("posts/" + postId).set(newPost).then(() => {
+        alert("Draft saved!");
+        document.getElementById("postTitle").value = "";
+        quill.setText("");
+      });
+    }
+  </script>
+</body>
+                        </html>
