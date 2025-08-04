@@ -1,58 +1,87 @@
-// js/editor.js
-import { auth, database } from './firebase-config.js';
-import { ref, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// creator/js/editor.js
 
-// Elements
-const logoutBtn = document.getElementById("logoutBtn");
-const saveBtn = document.getElementById("saveBtn");
-const postTitle = document.getElementById("postTitle");
-const postContent = document.getElementById("postContent");
-const savedAlert = document.getElementById("savedAlert");
+import { auth, db, storage } from './firebase-config.js';
+import { ref as dbRef, push, set } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
 
-// Check authentication state
+// DOM Elements
+const postForm = document.getElementById('postForm');
+const titleInput = document.getElementById('title');
+const contentInput = document.getElementById('content');
+const thumbnailInput = document.getElementById('thumbnail');
+const previewSection = document.getElementById('preview');
+const publishButton = document.getElementById('publishBtn');
+const previewButton = document.getElementById('previewBtn');
+const usernameInput = document.getElementById('username');
+const logoutButton = document.getElementById('logoutBtn');
+
+// Auto-fill username for current user
 onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "login.html";
+  if (user) {
+    const name = user.displayName || user.email.split('@')[0];
+    usernameInput.value = name;
+  } else {
+    // Redirect to login if not authenticated
+    window.location.href = 'login.html';
   }
 });
 
-// Logout
-logoutBtn.addEventListener("click", () => {
+// Logout functionality
+logoutButton.addEventListener('click', () => {
   signOut(auth).then(() => {
-    window.location.href = "login.html";
+    window.location.href = 'login.html';
   });
 });
 
-// Save post
-saveBtn.addEventListener("click", () => {
-  const title = postTitle.value.trim();
-  const content = postContent.value.trim();
+// Preview Function
+previewButton.addEventListener('click', () => {
+  const title = titleInput.value;
+  const content = contentInput.value;
 
-  if (!title || !content) {
-    alert("Title and content are required!");
+  previewSection.innerHTML = `
+    <h3>${title}</h3>
+    <p>${content}</p>
+  `;
+  previewSection.style.display = 'block';
+});
+
+// Publish Function
+postForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const title = titleInput.value.trim();
+  const content = contentInput.value.trim();
+  const username = usernameInput.value.trim();
+  const thumbnailFile = thumbnailInput.files[0];
+
+  if (!title || !content || !username || !thumbnailFile) {
+    alert('Please fill in all fields and upload a thumbnail.');
     return;
   }
 
-  const postRef = ref(database, `posts/${auth.currentUser.uid}`);
-  push(postRef, {
-    title,
-    content,
-    createdAt: new Date().toISOString()
-  }).then(() => {
-    showSavedAlert();
-    postTitle.value = "";
-    postContent.value = "";
-  }).catch((error) => {
-    console.error("Error saving post:", error);
-    alert("Failed to save post.");
-  });
-});
+  try {
+    // Upload thumbnail
+    const storageReference = storageRef(storage, `thumbnails/${Date.now()}_${thumbnailFile.name}`);
+    await uploadBytes(storageReference, thumbnailFile);
+    const thumbnailURL = await getDownloadURL(storageReference);
 
-// Show alert
-function showSavedAlert() {
-  savedAlert.style.display = "block";
-  setTimeout(() => {
-    savedAlert.style.display = "none";
-  }, 3000);
-                                            }
+    // Save post to Realtime Database
+    const postReference = push(dbRef(db, 'posts'));
+    await set(postReference, {
+      title,
+      content,
+      username,
+      thumbnailURL,
+      createdAt: new Date().toISOString()
+    });
+
+    alert('Post published successfully!');
+    postForm.reset();
+    previewSection.innerHTML = '';
+    previewSection.style.display = 'none';
+  } catch (error) {
+    console.error('Error publishing post:', error);
+    alert('Failed to publish post. Please try again.');
+  }
+});
